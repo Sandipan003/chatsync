@@ -11,11 +11,6 @@ const nextConfig = {
   
   // Completely disable development mode indicators
   devIndicators: false,
-  
-  // Images configuration
-  images: {
-    unoptimized: true,
-  },
 }
 
 module.exports = nextConfig 
