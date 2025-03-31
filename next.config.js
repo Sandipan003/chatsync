@@ -12,32 +12,13 @@ const nextConfig = {
   // Completely disable development mode indicators
   devIndicators: false,
   
-  // Add security headers
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
-          }
-        ]
-      }
-    ];
-  }
+  // Enable static exports for Netlify
+  output: 'export',
+  
+  // Images configuration for static export
+  images: {
+    unoptimized: true,
+  },
 }
 
 module.exports = nextConfig 

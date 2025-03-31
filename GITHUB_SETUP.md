@@ -18,7 +18,7 @@ After creating the repository, GitHub will show commands to push your existing r
 Run the following command in your terminal, replacing `USERNAME` and `REPO-NAME` with your GitHub username and repository name:
 
 ```bash
-git remote add origin https://github.com/USERNAME/REPO-NAME.git
+git remote add origin https://github.com/Sandipan003/chatsync.git
 ```
 
 ## 3. Push Your Code to GitHub
