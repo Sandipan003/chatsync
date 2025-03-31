@@ -12,10 +12,7 @@ const nextConfig = {
   // Completely disable development mode indicators
   devIndicators: false,
   
-  // Enable static exports for Netlify
-  output: 'export',
-  
-  // Images configuration for static export
+  // Images configuration
   images: {
     unoptimized: true,
   },
