@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ThemeProvider } from './theme-provider'
+import { ThemeProvider } from '@/components/theme-provider'
+import { AuthProvider } from '@/providers/AuthProvider'
+import { NotificationProvider } from '@/components/notifications/NotificationProvider'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
@@ -21,7 +23,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <NotificationProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </NotificationProvider>
     </ThemeProvider>
   )
 } 

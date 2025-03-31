@@ -6,6 +6,8 @@ import { PaperAirplaneIcon, PaperClipIcon, EllipsisVerticalIcon, MicrophoneIcon 
 import { VoiceMessage } from './voice-message'
 import { MessageReactions } from './message-reactions'
 import { FileDropZone } from './file-drop-zone'
+import { store } from '@/lib/store'
+import { useAuth } from '@/providers/AuthProvider'
 
 interface Message {
   id: string
@@ -36,6 +38,7 @@ interface ChatAreaProps {
 }
 
 export function ChatArea({ chat, onUpdateChat }: ChatAreaProps) {
+  const { user } = useAuth()
   const [message, setMessage] = useState('')
   const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>({})
   const [isTyping, setIsTyping] = useState(false)
@@ -46,7 +49,49 @@ export function ChatArea({ chat, onUpdateChat }: ChatAreaProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
   const voiceRecorderRef = useRef<HTMLDivElement>(null)
-  const currentUser = 'You' // In a real app, this would come from auth
+  const currentUser = user?.name || 'You' // Use the actual username
+
+  // Load messages when chat changes
+  useEffect(() => {
+    if (!chat || !user) return;
+    
+    // Check if this is a group chat or direct conversation
+    if (chat.isGroup) {
+      // For group chats, get messages from the group
+      const group = store.getGroup(chat.id);
+      if (group) {
+        setMessagesMap(prev => ({
+          ...prev,
+          [chat.id]: group.messages.map(msg => ({
+            id: msg.id,
+            chatId: chat.id,
+            content: msg.content,
+            sender: msg.senderId === user.id ? currentUser : store.getUser(msg.senderId)?.name || 'Unknown',
+            timestamp: new Date(msg.timestamp).toLocaleTimeString(),
+            type: 'text',
+            reactions: msg.reactions || []
+          }))
+        }));
+      }
+    } else {
+      // For direct conversations, get messages from the conversation
+      const conversation = store.getConversation(chat.id);
+      if (conversation) {
+        setMessagesMap(prev => ({
+          ...prev,
+          [chat.id]: conversation.messages.map(msg => ({
+            id: msg.id,
+            chatId: chat.id,
+            content: msg.content,
+            sender: msg.senderId === user.id ? currentUser : store.getUser(msg.senderId)?.name || 'Unknown',
+            timestamp: new Date(msg.timestamp).toLocaleTimeString(),
+            type: 'text',
+            reactions: msg.reactions || []
+          }))
+        }));
+      }
+    }
+  }, [chat, user, currentUser]);
 
   // Get messages for current chat
   const currentMessages = chat ? (messagesMap[chat.id] || []) : []
@@ -60,8 +105,9 @@ export function ChatArea({ chat, onUpdateChat }: ChatAreaProps) {
   }
 
   const handleSendMessage = async (content: string, type: 'text' | 'voice' | 'file' | 'image' = 'text', fileData?: { url: string, name: string, type: string }) => {
-    if (!chat || (!content.trim() && type === 'text')) return
+    if (!chat || !user || (!content.trim() && type === 'text')) return
 
+    // Create a new message in the UI
     const newMessage: Message = {
       id: Date.now().toString(),
       chatId: chat.id,
@@ -77,13 +123,31 @@ export function ChatArea({ chat, onUpdateChat }: ChatAreaProps) {
       } : {})
     }
 
+    // Update the UI immediately
     setMessagesMap(prev => ({
       ...prev,
       [chat.id]: [...(prev[chat.id] || []), newMessage]
     }))
     setMessage('')
     
-    // Update chat's last message
+    // Save to store based on chat type
+    if (chat.isGroup) {
+      // It's a group message
+      try {
+        store.sendGroupMessage(chat.id, user.id, content);
+      } catch (error) {
+        console.error('Failed to send group message:', error);
+      }
+    } else {
+      // It's a direct message
+      try {
+        store.sendMessage(chat.id, user.id, content);
+      } catch (error) {
+        console.error('Failed to send direct message:', error);
+      }
+    }
+    
+    // Update chat's last message in the sidebar
     onUpdateChat({
       ...chat,
       lastMessage: type === 'text' ? content : `Sent a ${type}`,
@@ -233,6 +297,37 @@ export function ChatArea({ chat, onUpdateChat }: ChatAreaProps) {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Empty State - Show a prompt to start the conversation */}
+        {currentMessages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4 py-12 space-y-6">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/30 to-indigo-600/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <div className="space-y-3 max-w-md">
+              <h3 className="text-xl font-semibold">Start a conversation with {chat.name}</h3>
+              <p className="text-muted-foreground">
+                {chat.isGroup 
+                  ? `This is the beginning of the group chat "${chat.name}". Say hello to everyone!` 
+                  : `This is the beginning of your conversation with ${chat.name}. Send a friendly message to get started!`}
+              </p>
+              <button
+                onClick={() => {
+                  const message = chat.isGroup 
+                    ? `Hello everyone in ${chat.name}!` 
+                    : `Hi ${chat.name}! How are you doing?`;
+                  handleSendMessage(message);
+                }}
+                className="mt-4 py-2.5 px-6 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-all"
+              >
+                Say Hello
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {/* Regular Messages */}
         {currentMessages.map((msg) => (
           <motion.div
             key={msg.id}

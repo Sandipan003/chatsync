@@ -20,6 +20,13 @@ ChatSync is a modern, feature-rich chat application built with Next.js 13, TypeS
 - 🖼️ Image gallery view
 - ⬇️ One-click media downloads
 
+### Social Features
+- 👥 Add friends via email
+- 📨 Friend request system with notifications
+- ✅ Accept/decline friend requests with visual feedback
+- 💬 Start conversations with newly accepted friends
+- 🔔 Global notification system for important events
+
 ### Group Chat Features
 - Create and manage group conversations
 - Member status indicators (online/offline)
@@ -39,6 +46,7 @@ ChatSync is a modern, feature-rich chat application built with Next.js 13, TypeS
 - Optimistic updates
 - Lazy loading for media
 - TypeScript type safety
+- LocalStorage persistence for chats and user data
 
 ## 🚀 Getting Started
 
@@ -61,20 +69,23 @@ npm install
 yarn install
 ```
 
-3. Create a `.env.local` file in the root directory and add your environment variables:
-```env
-NEXT_PUBLIC_API_URL=your_api_url
-NEXT_PUBLIC_SOCKET_URL=your_socket_url
-```
-
-4. Run the development server:
+3. Run the development server:
 ```bash
-npm run dev
-# or
-yarn dev
+# On Windows - to avoid permission issues
+$env:NEXT_TELEMETRY_DISABLED=1; npm run dev
+
+# On macOS/Linux
+NEXT_TELEMETRY_DISABLED=1 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Troubleshooting
+
+If you encounter permission issues with the `.next/trace` directory on Windows:
+1. Stop the development server
+2. Delete the `.next` directory: `rm -r -fo .next`
+3. Restart with telemetry disabled: `$env:NEXT_TELEMETRY_DISABLED=1; npm run dev`
 
 ## 🛠️ Tech Stack
 
@@ -85,33 +96,40 @@ yarn dev
 - **Icons:** Heroicons
 - **State Management:** React Hooks
 - **Media Handling:** Browser APIs (MediaRecorder, File API)
+- **Storage:** LocalStorage for data persistence
 
 ## 📁 Project Structure
 
 ```
 src/
 ├── app/                # Next.js 13 app directory
+│   └── page.tsx       # Main application layout
 ├── components/         # React components
 │   ├── chat-area.tsx  # Main chat interface
 │   ├── sidebar.tsx    # Chat list and navigation
 │   ├── providers.tsx  # Theme and other providers
+│   ├── friends/       # Friend-related components
+│   │   ├── AddFriend.tsx      # Add friend form
+│   │   └── FriendRequests.tsx # Friend request manager
+│   ├── groups/        # Group-related components
+│   ├── notifications/ # Notification system components
 │   └── ...           # Other components
 ├── lib/               # Utility functions
+│   └── store.ts      # Data storage and management
+├── providers/         # Context providers
+│   └── AuthProvider.tsx # Authentication management
 ├── styles/           # Global styles
 └── types/            # TypeScript types
 ```
 
-## 🔧 Configuration
+## 🔑 Using the App
 
-### Theme Configuration
-The application supports both light and dark themes. Theme configuration can be modified in `src/components/providers.tsx`.
-
-### Message Types
-Supported message types include:
-- Text messages
-- Voice messages
-- Image attachments
-- File attachments
+1. **Register/Login**: Sign up with your name, email, and password
+2. **Add Friends**: Use the Add Friend button to send friend requests
+3. **Accept Friend Requests**: Check the sidebar for pending friend requests
+4. **Start Conversations**: After accepting a request, start chatting immediately
+5. **Create Groups**: Use the Create Group button to make group chats
+6. **Send Messages**: Text, voice messages, images, and files
 
 ## 📱 Mobile Support
 
@@ -120,6 +138,27 @@ ChatSync is fully responsive and optimized for mobile devices:
 - Mobile-optimized media capture
 - Touch-friendly interface
 - Adaptive layouts
+
+## 📤 Pushing to GitHub
+
+To push your changes to GitHub:
+
+```bash
+# Initialize Git repository if not already done
+git init
+
+# Add remote repository
+git remote add origin https://github.com/yourusername/chatsync.git
+
+# Add all files
+git add .
+
+# Commit changes
+git commit -m "Initial commit with chat application"
+
+# Push to GitHub
+git push -u origin main
+```
 
 ## 🤝 Contributing
 
