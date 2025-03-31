@@ -2,7 +2,6 @@
 
 ChatSync is a modern, feature-rich chat application built with Next.js 13, TypeScript, and Tailwind CSS. It offers a clean, minimalist design while providing powerful communication features for both individual and group conversations.
 
-![ChatSync Preview](preview.png)
 
 ## ✨ Features
 
