@@ -4,6 +4,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@heroicons/react'],
   },
+  devIndicators: false,
 }
 
 module.exports = nextConfig 
