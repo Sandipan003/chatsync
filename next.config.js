@@ -4,13 +4,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@heroicons/react'],
   },
-  // Disable build ID generation to avoid trace issues
-  generateBuildId: async () => {
-    return 'minimalist-chat'
-  },
-  
-  // Completely disable development mode indicators
-  devIndicators: false,
 }
 
 module.exports = nextConfig 
